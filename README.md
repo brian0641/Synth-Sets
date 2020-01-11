@@ -2,7 +2,7 @@
 
 [Synthetix](https://www.synthetix.io/) is a crypto-backed synthetic asset platform. There are number of synthetic assets (synths), including a synthetic gold (sXAU), synthetic bitcoin (sBTC), and synthetix Ethereum (sETH). The various synth assets can be exchanged for one another using prices published by a price Oracle and with no slippage other than an exchange fee.
 
-[TokenSets](https://www.tokensets.com/) is a project that issues single ERC20 tokens that each represent an automatically rebalancing portfolio. Different portfolios based on different trading strategies. Users occur rebalancing slippage whenever a portfolio rebalances. Rebalancing slippage can be 0.6% and higher.   
+[TokenSets](https://www.tokensets.com/) is a project that issues single ERC20 tokens that each represent an automatically rebalancing portfolio. Different portfolios rebalance based on different trading strategies. Users occur rebalancing slippage whenever a portfolio rebalances. Rebalancing slippage can be 0.6% and higher.   
 
 This project uses the TokenSet signals to mimic the TokenSet performance using synths. The infinite liquidity and lower transaction fees of the Synthetix system should produce superior long-term performance relative to TokenSets.
 
