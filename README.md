@@ -14,7 +14,7 @@ There are two main functional components in Synth-Sets:
 
 + A server process, called the **trade signal server**, acts as the Trader and generates the trade signals for the smart contract. The server pulls the trade signals from the TokenSets project. The server is a light process and can be run by anyone. Or you can skip this step and instead hook into someone else's server.    
 
-From a security perspective, running your own server is more secure than using a third-party server. However, using a third-party server is not as bad as insecure as may be initially imagined. Trades are limited to trades within the Synthetix ecosystem. There are no inherently bad trades. Or stated differently, it is no easier to predict "bad" trades as it is to predict "good" trades.
+From a security perspective, running your own server is more secure than using a third-party server. However, using a third-party server is not as insecure as may be initially imagined. Trades are limited to trades within the Synthetix ecosystem. There are no inherently bad trades. Or stated differently, it is no easier to predict "bad" trades than it is to predict "good" trades.
 
 Additionally, the smart contract allows the Owner to specify a minimum time between trades. So if the intent is to follow a TokenSet that rebalances no more than once a week, this parameter would be set to allow no more than one trade a week. At anytime the Owner can disable trading or withdraw their funds.  
 
