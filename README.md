@@ -10,9 +10,9 @@ This project uses the TokenSet signals to mimic the TokenSet performance using s
 
 There are two main functional components in Synth-Sets:
 
-+ An Ethereum **smart contract** that holds synths for a user ("Owner"). Only the Owner can transfer the synths outside of the smart contract. When creating the smart contract, the Owner can designate a second address as a *trader* address. The trader can initiate trades in the synth ecosystem, but otherwise has no control over the Owner's funds. Only the Owner can withdraw.
++ An Ethereum **smart contract** that holds synths for a user ("Owner"). Only the Owner can transfer the synths outside of the smart contract. When creating the smart contract, the Owner can designate a second address as a *Trader* address. The Trader can initiate trades in the synth ecosystem, but otherwise has no control over the Owner's funds. Only the Owner can withdraw.
 
-+ A server process, called the **trade signal server**, that acts as the Trader and generates the trade signals for the smart contract. The server pulls the trade signals from the TokenSets project. The server is a light process and can be run by anyone. Or you can skip this step and instead hook into someone else's server.    
++ A server process, called the **trade signal server**, acts as the Trader and generates the trade signals for the smart contract. The server pulls the trade signals from the TokenSets project. The server is a light process and can be run by anyone. Or you can skip this step and instead hook into someone else's server.    
 
 From a security perspective, running your own server is more secure than using a third-party server. However, using a third-party server is not as bad as insecure as may be initially imagined. Trades are limited to trades within the Synthetix ecosystem. There are no inherently bad trades. Or stated differently, it is no easier to predict "bad" trades as it is to predict "good" trades.
 
