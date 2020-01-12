@@ -18,10 +18,6 @@ From a security perspective, running your own server is more secure than using a
 
 Additionally, the smart contract allows the Owner to specify a minimum time between trades. So if the intent is to follow a TokenSet that rebalances no more than once a week, this parameter would be set to allow no more than one trade a week. At anytime the Owner can disable trading or withdraw their funds.  
 
-The following diagram summarizes the components of Synth-Sets:
-
-![diagram](diagram-overview.png)
-
 ## Tutorials
 
 There is currently no easy graphical interface to deploy the smart contract or trade signal server (coming eventually I hope). The following tutorials describe "manual" deployment of the smart contract, connecting to an existing trade signal server, and installation of a new trade signal server.
