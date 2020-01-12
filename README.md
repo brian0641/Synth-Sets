@@ -20,7 +20,7 @@ Additionally, the smart contract allows the Owner to specify a minimum time betw
 
 The following diagram summarizes the components of Synth-Sets:
 
-*A cool diagram goes here -maybe*
+![diagram](diagram-overview.png)
 
 ## Tutorials
 
