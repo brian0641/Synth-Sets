@@ -13,7 +13,7 @@ Example trade_signal.json file:
 ```
 [
   {
-    "execution_time": 2020-01-12T14:10:53Z,
+    "execution_time": "2020-01-12T14:10:53Z",
     "trades": [ {"from": "sUSD", "to": "sETH", "percent": 100} ]
     "name": "ETH20MACO"
   }
