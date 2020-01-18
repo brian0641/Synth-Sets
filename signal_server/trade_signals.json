@@ -1,0 +1,13 @@
+[
+    {
+        "execution_time": "NOW",
+        "trades": [
+            {
+                "from": "sETH",
+                "to": "sUSD",
+                "percent": 100
+            }
+        ],
+        "name": "ETH20MACO"
+    }
+]

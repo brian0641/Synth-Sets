@@ -1,4 +1,4 @@
-import web3, json, time
+import web3, json, time, os, sys
 
 class ContractMonitor():
     """ Class to monitor the state of tradeProxy.sol contracts. 
@@ -15,21 +15,29 @@ class ContractMonitor():
          'tradingStrategyLabel': 'EMA20CO'
         }        
     """    
-    def __init__(self, provider, initial_addresses_to_monitor):
+    def __init__(self, provider, contracts_to_monitor_fn, logger):
         """
         provider: A web3.Web3 provider instance (e.g., provider = web3.Web3.HTTPProvider(url))
         initial_addresses_to_monitor: List of contract addresses.
         """
-        self.address = initial_addresses_to_monitor
         self.w3 = web3.Web3(provider)
         self.abi = json.load(open("../contracts/abi.json", "r"))
         
-        
+        self.log = logger
+                
         self.contract_state = {}  #address => state dictionary
         self.contracts = {}       #address => w3.eth.contract instance
         
+        initial_addresses_to_monitor = json.load(open(contracts_to_monitor_fn, "r"))
+        
+        self.contracts_to_monitor_fn = contracts_to_monitor_fn
+        self.contracts_file_last_modify = os.path.getmtime(self.contracts_to_monitor_fn) 
+        
         for _address in initial_addresses_to_monitor:
-            self._initializeState(_address)
+            try:
+                self._initializeState(_address)
+            except:
+                self.log("Error initializing contract: {}. Skipping. Msg: {}".format(_address, sys.exc_info()[0])) 
         
     def getContractState(self, address):
         return self.contract_state.get(address)
@@ -40,20 +48,51 @@ class ContractMonitor():
         """
         return list(self.contracts.keys())
     
+    def getAddressesThatMatchLabel(self, label):
+        """
+        Returns a list of all the contract address in which the state field 'tradingStrategyLabel' matches
+        the input label.
+        """
+        result = []
+        for address, state in self.contract_state.items():
+            if state['tradingStrategyLabel'] == label:
+                result.append(address)
+        return result
+        
+    
     def addContract(self, address):
         """
         Adds a new contract to monitor.
         """
-        self._initializeState(address)
+        try:
+            self._initializeState(address)
+        except:
+            self.log("Error initializing contract: {}. Skipping. Msg: {}".format(_address, sys.exc_info()[0]))         
     
     def run(self):
         UPDATE_PERIOD_MINUTES = 5
         last_update_ts = 0
         while 1:
+            # Periodically poll contract state info
             if time.time() > last_update_ts + 60 * UPDATE_PERIOD_MINUTES:
                 for _address in self.contracts.keys():
                     self.updateState(_address) 
                 last_update_ts = time.time()
+                
+            #check whether the file containing the addresses to monitor has been updated, add
+            # or delete from self.contracts and self.contract_state as appropriate
+            if os.path.getmtime(self.contracts_to_monitor_fn) > self.contracts_file_last_modify:
+                self.contracts_file_last_modify = os.path.getmtime(self.contracts_to_monitor_fn) 
+                addresses = set(json.load(open(self.contracts_to_monitor_fn, "r")))
+                existing_add = set(self.contracts.keys())
+                new_addresses = addresses.difference(existing_add)
+                delete_addresses = existing_add.difference(addresses)
+                for _address in new_addresses:
+                    self._initializeState(_address)
+                for _address in delete_addresses:
+                    del self.contracts[_address]
+                    del self.contract_state[_address]
+            
             time.sleep(10)
     
     def updateState(self, contract_address):
@@ -70,10 +109,9 @@ class ContractMonitor():
             
     def _initializeState(self, contract_address):
         try:
-            self.contracts[contract_address] = self.w3.eth.contract(address = contract_address, abi = self.abi)
+            k = self.w3.eth.contract(address = contract_address, abi = self.abi)
         except:
             return None
-        k = self.contracts[contract_address]
         d = {}
         d['enableTrading'] = k.functions.enableTrading().call()
         d['feeRate'] = k.functions.feeRate().call()
@@ -82,7 +120,8 @@ class ContractMonitor():
         d['owner'] = k.functions.owner().call()
         d['tradingStrategyLabel'] = k.functions.tradingStrategyLabel().call()        
         
-        self.contract_state[contract_address] = d        
+        self.contract_state[contract_address] = d    
+        self.contracts[contract_address] = k
         
     
 if __name__ == "__main__":

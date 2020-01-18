@@ -14,7 +14,6 @@ feeRate:            Fee that is given to the trader for each trade. Can potentia
                     Units are basis points * 100. So 1% fee would be 10000. A 0.02% fee is 200.
 */
 
-
 pragma solidity ^0.5.11;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/math/SafeMath.sol";
@@ -41,10 +40,9 @@ contract tradeProxy {
     // ========== CONSTANTS ==========
     
     //mainnet
-    //address constant public synthetixContractAddress = 0xC011A72400E58ecD99Ee497CF89E3775d4bd732F;
+    address public synthetixContractAddress = 0xC011A72400E58ecD99Ee497CF89E3775d4bd732F;
     //kovan
     //address public synthetixContractAddress = 0x22f1ba6dB6ca0A065e1b7EAe6FC22b7E675310EF;
-    address public synthetixContractAddress = 0x3B7890A13D97A10EEbf78dD141Cd42Dc8d7c6c9a;
     
     // ========== STATE VARIABLES ==========
     address public owner;
@@ -209,7 +207,7 @@ contract tradeProxy {
         require(feeRate >= minFeeRate, "Contract feeRate is too low.");
         
         uint feeAmount = feeForExchange(sourceAmount);
-        uint _sourceAmount = sourceAmount.sub(feeAmount);   //revers if result of subtraction is < zero
+        uint _sourceAmount = sourceAmount.sub(feeAmount);   //reverts if result of subtraction is < zero
         
         bool result = SynthetixInterface(synthetixContractAddress).exchange(sourceCurrencyKey,
                    _sourceAmount, destinationCurrencyKey);
@@ -217,7 +215,7 @@ contract tradeProxy {
         if (result) {
             lastTradeTS = now;
             feePoolBalances[sourceCurrencyKey] += feeAmount; 
-            emit tradeEvent(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
+            //emit tradeEvent(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
         }
                    
         return result;
