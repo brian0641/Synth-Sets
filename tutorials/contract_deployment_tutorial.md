@@ -25,13 +25,13 @@ We will be using [Remix](https://remix.ethereum.org/) to generate the bytecode f
 
 With the file open in the Remix editor, select the Remix "compile tab," and then select "Compile tradeProxy.sol". The contract should compile without errors. In the "Contract" pulldown menu, select "tradeProxy". Take note of the shortcuts to copy the "Bytecode" and the "ABI" of the contract to the clipboard.
 
-[diagram 2]
+![diagram2](contract_deployment_fig2.png)
 
 We will be using [MyEtherWallet](https://www.myetherwallet.com/) to deploy the contract to the Ethereum blockchain. MEW supports a number of techniques for storing your private key and signing transactions (not covered here). You want to deploy the contract the address that will be the Owner of the contract. The address needs to have enough Eth to pay for gas for the transactions.
 
 Open MEW in a new browser tab and navigate to "Deploy Contract" in the "Contract" interface (diagram below). Copy and paste the Bytecode data and ABI from Remix.
 
-[diagram 3]     
+![diagram3](contract_deployment_fig3.png)    
 
 After pasting the ABI, MEW will show the constructor fields that are required to deploy the contract. In the *owner* field, enter your address. In the *trader* field, enter the address of the Trader. If you are planning on running your own signal server, this should be another address you control. I am currently running a signal server that copies the TokenSets signals. If you want to hook into this, the following address should be entered in the *trader* field:
 0x2AF943092B26E6f24942d12364E047301d26B66a
@@ -39,7 +39,7 @@ After pasting the ABI, MEW will show the constructor fields that are required to
 
 The *minMinsBtwTrades* is the minimum minutes that you require between trades (10 minutes in diagram 3). The *feeRate* field represents the fee rate (in units of basis points * 100) that you are willing to pay the provider of the signal server. The fee rate should be zero if you are running your own signal server. If using mine, enter 100. This is equivalent to one basis point (0.01%) per trade, through which I am mostly hoping to recover the gas cost.
 
-[diagram 4]
+![diagram4](contract_deployment_fig4.png)
 
 Any value is acceptable for the "Contract Name" field.
 
