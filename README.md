@@ -22,6 +22,6 @@ Additionally, the smart contract allows the Owner to specify a minimum time betw
 
 There is currently no easy graphical interface to deploy the smart contract or trade signal server (coming eventually I hope). The following tutorials describe "manual" deployment of the smart contract, connecting to an existing trade signal server, and installation of a new trade signal server.
 
-+ smart contract deployment  [TODO]
++ [smart contract deployment tutorial](/tutorials/contract_deployment_tutorial.md)
 + connection to existing signal server [TODO]
 + installation of your own signal server [TODO] 
