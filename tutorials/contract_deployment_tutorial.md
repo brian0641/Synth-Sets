@@ -21,7 +21,7 @@ The important functions/parameters implemented by the contract include:
 
 We will be using [Remix](https://remix.ethereum.org/) to generate the bytecode for the contract. In Remix, select the "Solidity" environment. In the "File Explorer" tab, select "create new file" and paste in the [source code](https://github.com/brian0641/Synth-Sets/blob/master/contracts/tradeProxy.sol). Name the file "tradeProxy.sol" (although the name is not important; you can name it anything). The diagram below illustrates these navigation steps for navigating Remix.
 
-[diagram1](contract_deployment_fig1.png)
+![diagram1](contract_deployment_fig1.png)
 
 With the file open in the Remix editor, select the Remix "compile tab," and then select "Compile tradeProxy.sol". The contract should compile without errors. In the "Contract" pulldown menu, select "tradeProxy". Take note of the shortcuts to copy the "Bytecode" and the "ABI" of the contract to the clipboard.
 
