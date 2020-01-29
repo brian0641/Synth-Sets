@@ -9,7 +9,7 @@ has no other control of the owner's funds. Only the Owner can withdraw synths.
 
 The important functions/parameters implemented by the contract include:
 * *enableTrading* (settable only by the Owner). By setting this variable, the Owner can enable or disable synth trading by the Trader.
-* *minMinsBtwTrades* (settable only by the Owner). This is the minimum minutes required between trades. Can be used as a safeguard against over trading by the Trading. For a strategy that trades no more than once a day, this should be set to 1440 (60*24).
+* *minMinsBtwTrades* (settable only by the Owner). This is the minimum minutes required between trades. Can be used as a safeguard against over trading by the Trader. For a strategy that trades no more than once a day, this should be set to 1440 (60*24).
 * *feeRate* (settable only by the Owner). If you are using a third-party trade signal server, this should be set to the feeRate required by the third-party. Units are basis points * 100. So 1% fee would be 10000. A 0.02% fee is 200. If running your own trade signal server, set this to zero.
 * *tradingStrategyLabel* (settable only by the Owner). Set this to the name of the desired TokenSet strategy (e.g., ETH20MACO). The Trader will read this to determine what strategy should be implemented.
 * *withdraw* (function callable only by Owner). Used to withdraw synths from the contract to the Owner's address.
@@ -27,7 +27,7 @@ With the file open in the Remix editor, select the Remix "compile tab," and then
 
 ![diagram2](contract_deployment_fig2.png)
 
-We will be using [MyEtherWallet](https://www.myetherwallet.com/) to deploy the contract to the Ethereum blockchain. MEW supports a number of techniques for storing your private key and signing transactions (not covered here). You want to deploy the contract the address that will be the Owner of the contract. The address needs to have enough Eth to pay for gas for the transactions.
+We will be using [MyEtherWallet](https://www.myetherwallet.com/) to deploy the contract to the Ethereum blockchain. MEW supports a number of techniques for storing your private key and signing transactions (not covered here). You want to deploy the contract to the address that will be the Owner of the contract. The address needs to have enough Eth to pay for gas for the transactions.
 
 Open MEW in a new browser tab and navigate to "Deploy Contract" in the "Contract" interface (diagram below). Copy and paste the Bytecode data and ABI from Remix.
 
