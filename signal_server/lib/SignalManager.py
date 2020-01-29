@@ -1,69 +1,32 @@
-import time, json
+import time, json, threading
 import dateutil.parser, pytz, datetime, os.path
-
-
 
 class SignalManager():
     """ Class to manage and provide the reading of trade signals."""
-    def __init__(self, fn_signals, logger):
+    def __init__(self, cfg, logger):
         self.signals = []  #list of pending trade signals
-        self.signals_last_read_time = 0   #timestamp of last read 
         
-        self.fn_signals = fn_signals
-        
-        self.signals = self.readSignalFile()
-        self.signals_last_read_time = os.path.getmtime(self.fn_signals) 
+        if cfg.zmqPullSocket:
+            import zmq
+            context = zmq.Context()
+            self.receiver = context.socket(zmq.PULL)
+            self.receiver.bind(cfg.zmqPullSocket) 
+            
+            t = threading.Thread(target=self._zmqReceive) #start thread to receive zmq signals
+            t.start()   
+        else:
+            self.log("zmq socket was not configured. Signals will not be received by the trade_signal_server.")
         
         self.log = logger
         
-    def readSignalFile(self):
-        """ Reads the signal file. 
-        Returns:  an iterable of all the signals in the signal file.
-        """
-        signals = []
-        try:
-            signals = json.load(open(self.fn_signals, "r"))
-        except:
-            raise ValueError("Error reading the signal file.")
-        return signals
-        
-    def removeSignalsAndWriteFile(self, signals):
-        """
-        Remove signals from the disk stoarge. This method would typically be called when a trade signal 
-        was successfully processed. Signals are matched to one
-        another by using the "execution time" and "name" field as a key.
-        
-        signals: iterable of trade signals that are to be removed from the signal file. 
-        
-        Returns True if successful
-        """
-        out_signals = [] 
-        
-        if not signals:   #exit if nothing was passed
-            return True 
-        
-        #filter the signals on disk to remove those in signals
-        set_signals = set( [(s['execution_time'], s['name']) for s in signals] )
-        try:
-            for signal in self.readSignalFile():
-                set_signal = set([(signal['execution_time'], signal['name'])])
-                if not (len(set_signals.difference(set_signal)) < len(set_signals)):
-                    out_signals.append(signal)
-             
-            self.signals = out_signals
-            with open(self.fn_signals, "w") as write_file:
-                json.dump(out_signals, write_file)                
-            return True
-        except:
-            return False
-        
     def triggeredSignals(self, max_behind_mins):
-        """Returns a list of signals that have been triggered based on the execution_time field.
+        """Returns a list of signals that have been triggered based on the execution_time field. Triggered 
+        signals are removed from self.signals.
         
         max_behind_mins: if the scheduled execution time for a signal is more than this number of minutes in the 
                          past, the signal is not executed.
         """
-        triggered = []; errors = []
+        triggered = []; errors = []; _signals = []
         for s in self.signals:
             if s['execution_time'] == "NOW" or s['execution_time'] == "":
                 triggered.append(s)
@@ -74,20 +37,21 @@ class SignalManager():
                     errors.append(s)
                 elif datetime.datetime.now(pytz.timezone("utc")) > signal_dt:
                     triggered.append(s)
+                else:
+                    _signals.append(s)
+        self.signals = _signals
         return triggered, errors
         
-        
-    def fileUpdated(self):
-        """Checks self.fn_signals to determine if file was updated. If so,
-        read in and the new version of the signals from the file. 
-        
-        Return True if a new version was detected. Otherwise False.
-        """
-        if os.path.getmtime(self.fn_signals) > self.signals_last_read_time:
-            self.signals_last_read_time= os.path.getmtime(self.fn_signals)
-            self.signals = self.readSignalFile()
-            return True
-        return False
+    def _zmqReceive(self):
+        while 1:
+            s = self.receiver.recv()
+            signal = json.loads(s)
+            if 'execution_time' in signal and 'params' in signal and \
+            'name' in signal and 'type' in signal:    #check valid signal
+                self.signals.append(signal)
+            else:
+                self.log("Invalid trade signal received via zmq")
+            time.sleep(1)
         
     
 if __name__ == "__main__":

@@ -42,28 +42,46 @@ class TradeExecutor():
             self.contracts[contract_address] = self.w3.eth.contract(address = contract_address, abi = self.abi)
         k = self.contracts[contract_address]
         
-        trades = trade_signal['trades']
-        
-        all_synths = set()
-        for t in trades:
-            all_synths.add(t['from'])
-            
         #Check that contract state info satisfies constraints
         if not contract_state['enableTrading']: 
             self.log("Trading is not enabled for the contract: {}".format(contract_address))
             return []
         if contract_state['feeRate'] < min_fee_rate: 
             self.log("Minimum fee rate of the contract is too low. Contract: {}".format(contract_address))
-            return []
-        
+            return []   
         
         #Get current gas price limit that is allowed by the synthetix contract
-        gpl = self.synthetix_contract.functions.gasPriceLimit().call()
+        gpl = self.synthetix_contract.functions.gasPriceLimit().call()     
+        
+        if trade_signal['type'] == "type1":
+            try:
+                txn_hashes = self._executeType1(trade_signal, k, contract_state, gpl)
+            except:
+                self.log("Error executing Type1 trade signal: {}".format(trade_signal))
+        elif trade_signal['type'] == "type2":
+            try:
+                txn_hashes = self._executeType2(trade_signal, k)
+            except:
+                self.log("Error executing Type2 trade signal: {}".format(trade_signal))            
+        elif trade_signal['type'] == "type3":
+            try:
+                txn_hashes = self._executeType3(trade_signal, k, contract_state, gpl)
+            except:
+                self.log("Error executing Type3 trade signal: {}".format(trade_signal))            
+        else:
+            self.log('Trade signal *type* field was not recognized.')
+            txn_hashes = []
+        return txn_hashes
+    
+    def _executeType1(self, trade_signal, k, contract_state, gpl):
+        all_synths = set()
+        for t in trade_signal["params"]["trades"]:
+            all_synths.add(t['from'])
             
         balances = self.getBalances(k, all_synths)
         
         txn_hashes = []
-        for t in trades:
+        for t in trade_signal['params']['trades']:
             balance = balances.get(t['from'])
             if balance != None and balance > 0: 
                 amt = int(balance * t['percent'] / 100)
@@ -88,8 +106,64 @@ class TradeExecutor():
                 txn_hashes.append(txn_hash)
                 
         return txn_hashes
+    
+    def _executeType2(self, trade_signal, k):
+        #TODO - this trade type requires the current exchange rates
+        raise NotImplementedError
+        #all_synths = set()
+        #for synth in trade_signal["params"]["synths"]:
+            #all_synths.add(t['from'])
             
+        #balances = self.getBalances(k, all_synths)
         
+        #balance_total = sum(list(balances.values()))
+        #weight_total = float(sum(trade_signal["params"]["weights"]))
+        
+        #desired_balances = {}
+        #for synth in trade_signal["params"]["synths"]:
+            #desired_balances[synth] = 
+        
+    def _executeType3(self, trade_signal, k, contract_state, gpl):
+        all_synths = set()
+        for arr in trade_signal["params"]["pairs"]:
+            all_synths.add(arr[0])
+            all_synths.add(arr[1])
+            
+        balances = self.getBalances(k, all_synths)
+        
+        txn_hashes = []
+        for arr in trade_signal["params"]["pairs"]:
+            synth1 = arr[0]; synth2 = arr[1]
+            if balances[synth1] > balances[synth2]:
+                from_synth = synth1
+                to_synth = synth2
+            else:
+                from_synth = synth2
+                to_synth = synth1
+                
+            if balances[from_synth] != None and balances[from_synth] > 0: 
+                amt = int(balance)
+            
+                src_curr_key = self._nameToKey(from_synth)
+                dst_curr_key = self._nameToKey(to_synth)
+                
+                #Build and send transaction
+                trader_address = contract_state['trader']
+                nonce = self.w3.eth.getTransactionCount(trader_address)  
+                
+                #Build a transaction that invokes this contract's function, called transfer
+                options = {'chainId': self.chainId, 'gas': 500000, 'gasPrice': gpl, 'nonce': nonce}
+                
+                txn = k.functions.trade(src_curr_key, amt, dst_curr_key, self.min_fee_rate).buildTransaction(options)
+                
+                signed_txn = self.w3.eth.account.sign_transaction(txn, private_key=self.signing_accounts[trader_address])
+                
+                self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)  
+                txn_hash = self.w3.toHex(self.w3.keccak(signed_txn.rawTransaction))   
+                txn_hashes.append(txn_hash)
+                
+        return txn_hashes
+    
     def getBalances(self, contract_instance, synths):
         """
         synths: iterable of the synth names for which the balances is to be retrieved.

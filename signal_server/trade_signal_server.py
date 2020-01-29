@@ -13,7 +13,7 @@ def log(s):
 
 def main():
     # SignalManger manages the inputting of trade_signals. Currently a simple file system is used communicate the trade signals.
-    sm = lib.SignalManager.SignalManager(cfg.trade_signals_fn, log)
+    sm = lib.SignalManager.SignalManager(cfg, log)
     
     # ContractMonitor monitors the state of tradeProxy.sol contracts (e.g., trading enabled, trade strategy selected, etc.). 
     provider = web3.Web3.HTTPProvider(cfg.getConnectionUrl())
@@ -28,11 +28,7 @@ def main():
     pending_tx_hashes = []
     
     while True:
-        if sm.fileUpdated():
-            log("Signal file was updated.")
-        
         triggered_signals, error_signals = sm.triggeredSignals(cfg.MAX_MINS_BEHIND)
-        sm.removeSignalsAndWriteFile(error_signals)
         
         if triggered_signals:
             for signal in triggered_signals:
@@ -45,7 +41,6 @@ def main():
                     log("Signal submitted. Tx hash(es): {}. Signal:{}".format(tx_hashes, signal))
                     tx_hashes = [(v, signal, time.time()) for v in tx_hashes]
                     pending_tx_hashes.extend(tx_hashes)
-            sm.removeSignalsAndWriteFile(triggered_signals)  #remove the process signals from the input signal queue
                     
         #Check status of pending tx hashes
         pending_tx_hashes, _completed = lib.Utils.checkTxHashes(pending_tx_hashes, w3)

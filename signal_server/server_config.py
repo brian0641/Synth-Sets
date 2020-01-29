@@ -2,7 +2,10 @@
 # Configuration file for trade_signal_server
 #
 
-trade_signals_fn = "trade_signals.json"
+#
+# Configure channels over which trade signals are received.
+# zmqPullSocket   => enter the socket info; set to None if not used.
+zmqPullSocket = "tcp://*:6237"
 
 #The contracts (addresses) that are to be monitored are stored in a json file
 contracts_to_monitor_fn = "contracts_to_monitor.json"
