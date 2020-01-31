@@ -119,6 +119,11 @@
 		"constant": true,
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "synthAddress",
+				"type": "address"
+			},
+			{
 				"internalType": "bytes32",
 				"name": "currencyKey",
 				"type": "bytes32"
@@ -427,6 +432,11 @@
 				"type": "uint256"
 			},
 			{
+				"internalType": "address",
+				"name": "synthAddress",
+				"type": "address"
+			},
+			{
 				"internalType": "bytes32",
 				"name": "currencyKey",
 				"type": "bytes32"
@@ -451,6 +461,11 @@
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "synthAddress",
+				"type": "address"
 			},
 			{
 				"internalType": "bytes32",

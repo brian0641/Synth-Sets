@@ -22,11 +22,6 @@ contract SynthetixInterface {
     function exchange(bytes32 sourceCurrencyKey, uint sourceAmount, bytes32 destinationCurrencyKey)
         external 
          returns (bool success);
-         
-    function synths(bytes32 currencyKey)
-    public 
-    view
-    returns (address _address);
 }
 
 contract ERC20Interface {
@@ -133,15 +128,16 @@ contract tradeProxy {
     /**
      * @notice Withdraws synths from the contract to the owner.
      * @param  amount The amount (in wei) to withdraw.
-     * @param  currencyKey The currency key of the synth to withdraw.  
+     * @param  synthAddress The address of the contract of the synth to withdraw.  
+     * @param  currencyKey The currencyKey of the synth to withdraw.
      */
-    function withdraw(uint amount, bytes32 currencyKey)
+    function withdraw(uint amount, address synthAddress, bytes32 currencyKey)
         external
         returns (bool)
     {
         require(msg.sender == owner);
         
-        uint withdrawable = getBalance(currencyKey);
+        uint withdrawable = getBalance(synthAddress, currencyKey);
         
         //If they try to withdraw too much. Just give them their entire balance.
         uint _amount;
@@ -152,17 +148,16 @@ contract tradeProxy {
             _amount = amount;
         }
         
-        address synthAddress = SynthetixInterface(synthetixContractAddress).synths(currencyKey);
         return ERC20Interface(synthAddress).transfer(msg.sender, _amount);
     }
-    
     
     /**
      * @notice Withdraws synths owed to the Trader. 
      * @param  amount The amount (in wei) to withdraw.
-     * @param  currencyKey The currency key of the synth to withdraw.  
+     * @param  synthAddress The address of the contract of the the synth to withdraw.
+     * @param  currencyKey The currencyKey of the synth to withdraw.
      */
-    function withdrawTrader(uint amount, bytes32 currencyKey)
+    function withdrawTrader(uint amount, address synthAddress, bytes32 currencyKey)
         public
         returns (bool)
     {
@@ -176,7 +171,6 @@ contract tradeProxy {
             _amount = amount;
         }
         
-        address synthAddress = SynthetixInterface(synthetixContractAddress).synths(currencyKey);
         bool result = ERC20Interface(synthAddress).transfer(msg.sender, _amount);
         
         if (result) {
@@ -277,13 +271,14 @@ contract tradeProxy {
     
     /**
      * @return The Owner's balance, in wei, for the synth. 
+     * @param synthAddress The address of the deployed contract of the synth.
+     * @param currencyKey The currencyKey of the synth.
      * */
-    function getBalance(bytes32 currencyKey)
+    function getBalance(address synthAddress, bytes32 currencyKey)
         public
         view
         returns (uint)
     {
-        address synthAddress = SynthetixInterface(synthetixContractAddress).synths(currencyKey);
         uint totalBal = ERC20Interface(synthAddress).balanceOf(address(this));
         
         if (totalBal <= feePoolBalances[currencyKey]) 
