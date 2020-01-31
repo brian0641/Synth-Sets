@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     i = 0
     for s in signals:
-        sender.send(json.dumps(s))
+        sender.send_string(json.dumps(s))
         print("Signal sent to trade_signal_server")
         pprint.pprint(s)
         print()

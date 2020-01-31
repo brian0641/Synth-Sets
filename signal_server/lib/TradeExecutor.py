@@ -4,7 +4,7 @@ class TradeExecutor():
     """ Class to submit synthetix.exchange txes to the blockchain. 
     
     """    
-    def __init__(self, pw3, synthetix_contract_address, signing_accounts, network, min_fee_rate, logger):
+    def __init__(self, w3, synthetix_contract_address, signing_accounts, network, min_fee_rate, logger):
         """
         w3: A web3.Web3 instance 
         synthetix_contract_address: address of the synthetix contract
@@ -27,7 +27,7 @@ class TradeExecutor():
         if network == "mainnet":
             self.chainId = 1
         elif network == "kovan":
-            self.chainId = 1
+            self.chainId = 42
         else:
             raise ValueError("Unknown network name")
         
@@ -58,16 +58,19 @@ class TradeExecutor():
                 txn_hashes = self._executeType1(trade_signal, k, contract_state, gpl)
             except:
                 self.log("Error executing Type1 trade signal: {}".format(trade_signal))
+                txn_hashes = []
         elif trade_signal['type'] == "type2":
             try:
                 txn_hashes = self._executeType2(trade_signal, k)
             except:
                 self.log("Error executing Type2 trade signal: {}".format(trade_signal))            
+                txn_hashes = []
         elif trade_signal['type'] == "type3":
             try:
                 txn_hashes = self._executeType3(trade_signal, k, contract_state, gpl)
             except:
                 self.log("Error executing Type3 trade signal: {}".format(trade_signal))            
+                txn_hashes = []
         else:
             self.log('Trade signal *type* field was not recognized.')
             txn_hashes = []

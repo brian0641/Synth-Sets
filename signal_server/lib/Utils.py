@@ -1,4 +1,5 @@
-def checkTxHashes(pending_tx_hashes, w3):
+import web3, json
+def checkTxHashes(pending_tx_hashes, w3, log):
     """Fetches the status of the tx_hashes.
     
     Return: a tuple of still_pending, completed iterable.

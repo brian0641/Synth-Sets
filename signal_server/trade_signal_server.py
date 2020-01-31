@@ -42,7 +42,7 @@ def main():
                     pending_tx_hashes.extend(tx_hashes)
                     
         #Check status of pending tx hashes
-        pending_tx_hashes, _completed = lib.Utils.checkTxHashes(pending_tx_hashes, w3)
+        pending_tx_hashes, _completed = lib.Utils.checkTxHashes(pending_tx_hashes, w3, log)
         
         time.sleep(5)
     
