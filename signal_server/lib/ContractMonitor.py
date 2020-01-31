@@ -15,12 +15,12 @@ class ContractMonitor():
          'tradingStrategyLabel': 'EMA20CO'
         }        
     """    
-    def __init__(self, provider, contracts_to_monitor_fn, logger):
+    def __init__(self, w3, contracts_to_monitor_fn, logger):
         """
-        provider: A web3.Web3 provider instance (e.g., provider = web3.Web3.HTTPProvider(url))
+        provider: A web3.Web3 instance 
         initial_addresses_to_monitor: List of contract addresses.
         """
-        self.w3 = web3.Web3(provider)
+        self.w3 = w3
         self.abi = json.load(open("../contracts/abi.json", "r"))
         
         self.log = logger
@@ -36,6 +36,7 @@ class ContractMonitor():
         for _address in initial_addresses_to_monitor:
             try:
                 self._initializeState(_address)
+                self.log("Contract successfully initialized: {}".format(_address)) 
             except:
                 self.log("Error initializing contract: {}. Skipping. Msg: {}".format(_address, sys.exc_info()[0])) 
         

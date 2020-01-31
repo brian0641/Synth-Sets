@@ -2,6 +2,7 @@
 # Configuration file for trade_signal_server
 #
 
+
 #
 # Configure channels over which trade signals are received.
 # zmqPullSocket   => enter the socket info; set to None if not used.
@@ -21,15 +22,20 @@ MIN_FEE_RATE = 0
 MAX_MINS_BEHIND= 5
 
 #
-#Ethereum network connection 
+# Generate the Web3 connection. See: https://web3py.readthedocs.io/en/stable/providers.html
 #
 # network = "mainnet" or "kovan"
 network = "mainnet"
-def getConnectionUrl():
+kovan_url = """KOVAN NODE URL GOES HERE"""    #kovan url, if connecting via HTTP to kovan
+main_url =  """mainnet NODE URL GOES HERE"""
+def getWeb3Instance():
+    import web3
     if network == "kovan":
-        return  """KOVAN NODE URL GOES HERE"""
+        provider = web3.Web3.HTTPProvider(kovan_url)
     elif network == "mainnet":
-        return """MAIN_NODE_URL_GOES_HERE"""
+        provider = web3.Web3.HTTPProvider(main_url)
+    w3 = web3.Web3(provider)        
+    return w3  
 def getSynthetixAddress():
     """Address of the synthetix contract"""
     if network == "kovan":

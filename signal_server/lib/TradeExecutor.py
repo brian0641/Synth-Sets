@@ -4,14 +4,14 @@ class TradeExecutor():
     """ Class to submit synthetix.exchange txes to the blockchain. 
     
     """    
-    def __init__(self, provider, synthetix_contract_address, signing_accounts, network, min_fee_rate, logger):
+    def __init__(self, pw3, synthetix_contract_address, signing_accounts, network, min_fee_rate, logger):
         """
-        provider: A web3.Web3 provider instance (e.g., provider = web3.Web3.HTTPProvider(url))
+        w3: A web3.Web3 instance 
         synthetix_contract_address: address of the synthetix contract
         signing_accounts: dictionary of address=> private key that are to be used when signing exchange transactions 
         network: "mainnet" or "kovan"
         """
-        self.w3 = web3.Web3(provider)
+        self.w3 = w3
         self.abi = json.load(open("../contracts/abi.json", "r"))
         self.synth_abi = json.load(open("./abis/synth_abi.json", "r"))
         self.log = logger

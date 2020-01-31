@@ -16,13 +16,12 @@ def main():
     sm = lib.SignalManager.SignalManager(cfg, log)
     
     # ContractMonitor monitors the state of tradeProxy.sol contracts (e.g., trading enabled, trade strategy selected, etc.). 
-    provider = web3.Web3.HTTPProvider(cfg.getConnectionUrl())
-    w3 = web3.Web3(provider)
-    cm = lib.ContractMonitor.ContractMonitor(provider, cfg.contracts_to_monitor_fn, log)
+    w3 = cfg.getWeb3Instance()
+    cm = lib.ContractMonitor.ContractMonitor(w3, cfg.contracts_to_monitor_fn, log)
     threading.Thread(target=cm.run).start() #start thread to periodically fetch contract state info from the blockchain
     
     # TradeExecutor submits the trade txes to the blockchain. 
-    te = lib.TradeExecutor.TradeExecutor(provider, cfg.getSynthetixAddress(), cfg.signing_accounts, 
+    te = lib.TradeExecutor.TradeExecutor(w3, cfg.getSynthetixAddress(), cfg.signing_accounts, 
                                          cfg.network, cfg.MIN_FEE_RATE, log)
     
     pending_tx_hashes = []
