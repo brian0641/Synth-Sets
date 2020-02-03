@@ -18,10 +18,33 @@ From a security perspective, running your own server is more secure than using a
 
 Additionally, the smart contract allows the Owner to specify a minimum time between trades. So if the intent is to follow a TokenSet that rebalances no more than once a week, this parameter would be set to allow no more than one trade a week. At anytime the Owner can disable trading or withdraw their funds.  
 
-## Tutorials
+## Architecture (blockchain)
 
-There is currently no easy graphical interface to deploy the smart contract or trade signal server (coming eventually I hope). The following tutorials describe "manual" deployment of the smart contract, connecting to an existing trade signal server, and installation of a new trade signal server.
+The Ethereum smart contract architecture is very simple. The main contract is "tradeProxy.sol," an instance of which is deployed for each user. tradeProxy allows the person that deploys the contract (the Owner) to designate another address (the Trader) to place synth trades on behalf of the Owner. The Trader has no other control of the owner's funds. Only the Owner can withdraw synths.   
 
-+ [smart contract deployment tutorial](/tutorials/contract_deployment_tutorial.md)
-+ connection to existing signal server [TODO]
-+ installation of your own signal server [TODO] 
+A factory contract (tradeProxyFactory.sol) is used to create and track new instances of tradeProxy. The current address of the factory contract is:
+* **Mainnet**: COMING-SOON
+* **Kovan testnet** : 0x1F211b8Ea061F6b90153e9d4B2FBE3808b574aA8
+
+The main functions/parameters that are implemented by tradeProxy, and which are settable only by the Owner, include:
+* *Enable/Disable Trading.* The Owner can, at any time, enable or disable synth trading by the Trader.
+
+* *Minimum Minutes Between Trades.* This is the minimum minutes required between trades. Can be used as a safeguard against over trading by the Trader. E.g., for a strategy that trades no more than once a day, this should be set to 1440 (60*24).
+
+* *Allowable Synths To Trade.* List of synths that the owner designates as synths that are eligible for trading. For example, a swing trading strategy that alternates between sETH and sUSD may set this parameter to limit trading to these two synths.
+
+* *Trade Strategy (string).* The is a label that the Owner uses to indicate which automated strategy they wish to have implemented on their synths.
+
+* *Withdraw*.  Used to withdraw synths from the contract to the Owner's address.
+
+## Architecture (server-side)
+
+A server process is needed to act as the Trader to generate the trade signals for the contracts. A design goal of this project is to make it as easy as possible for users to either run their own server or hook into another server. The server processes are divided into two separate processes:
+* A *signal server* that receives the trade signals and handles submitting the corresponding Ethereum transactions to the blockchain.
+
+* *Signal generators* that source the trade signals. Currently, a TokenSets generator is implemented (/signal_generators/TokenSets_Generator/) to pull TokenSet signals from the TokenSet smart contracts and a manual generator is implemented (/signal_generators/Manual_Generator/) to allow trades to manually be input via a text file (this one is mostly for testing).
+
+
+## UI
+
+There is currently no easy graphical interface. This is a high priority and will be implemented next.

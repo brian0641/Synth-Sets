@@ -12,6 +12,8 @@ minMinsBtwTrades:   Successive trades will fail if not at least this many minute
                       overtrading the account.
 feeRate:            Fee that is given to the trader for each trade. Can potentially be set to 0.
                     Units are basis points * 100. So 1% fee would be 10000. A 0.02% fee is 200.
+strategyLabel:      String that allows the Owner to indicate, to the Trader, which trading strategy 
+                    should be implemented.
 */
 
 pragma solidity ^0.5.11;
@@ -36,6 +38,11 @@ contract tradeProxy {
     bool public enableTrading = true;
     uint public minMinsBtwTrades;
     uint public feeRate;
+    
+    // The Owner can optionally indicate that only certain synths are allowed to be traded. This 
+    // restriction is off by default.
+    mapping (bytes32 => bool) public allowableSynths;
+    bool public enableAllowSynths = false;
     
     //User can optionally set a label for they trading strategy they would like implemented
     string public tradingStrategyLabel; 
@@ -85,6 +92,26 @@ contract tradeProxy {
     {
         require(msg.sender == owner, "Only the Owner can enable/disable trading");
         enableTrading = _enableTrading;
+    }
+    
+     /**
+     * @notice Owner can optionally restrict the Trader to trading only "approved" synths.
+     * @param  _enforceAllowSynths Boolean that indicates whether this restriction is enforced.
+     * @param  _currencyKeys. Currency keys to set to allow or not allow. 
+     * @param  _allow. The boolean value to set for each of _currencyKeys.
+     */
+    function setAllowSynthsRestriction(bool _enforceAllowSynths, bytes32[] calldata  _currencyKeys, 
+                                       bool[] calldata _allow)
+        external
+    {
+        require(msg.sender == owner, "Only the Owner can set the allowable synths.");
+        require(_currencyKeys.length == _allow.length, "Array lengths do not match.");
+        enableAllowSynths = _enforceAllowSynths;
+        
+        if (enableAllowSynths) {
+            for (uint i = 0; i < _currencyKeys.length; i++) 
+               allowableSynths[_currencyKeys[i]] = _allow[i];  
+        }
     }
     
     function setFeeRate(uint _feeRate)
@@ -194,6 +221,11 @@ contract tradeProxy {
         require(enableTrading, "Trading is disabled");
         require(isTradeEligible(), "Not enough time has passed since last trade");
         require(feeRate >= minFeeRate, "Contract feeRate is too low.");
+        
+        if (enableAllowSynths) {
+            require(allowableSynths[sourceCurrencyKey] && allowableSynths[destinationCurrencyKey],
+                    "Permission is denied to trade at least one of the synths.");
+        }
         
         uint feeAmount = feeForExchange(sourceAmount);
         uint _sourceAmount = sourceAmount.sub(feeAmount);   //reverts if result of subtraction is < zero
@@ -309,6 +341,8 @@ contract tradeProxy {
         
         return _feeAmount;
     }
+    
+    //TODO - getter for allowableSynths
     
     // ========== EVENTS ==========
     event tradeEvent(bytes32 _sourceCurrencyKey, 
