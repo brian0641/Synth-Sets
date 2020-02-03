@@ -18,16 +18,7 @@ pragma solidity ^0.5.11;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/math/SafeMath.sol";
 
-contract SynthetixInterface {
-    function exchange(bytes32 sourceCurrencyKey, uint sourceAmount, bytes32 destinationCurrencyKey)
-        external 
-         returns (bool success);
-}
-
-contract ERC20Interface {
-    function transfer(address to, uint tokens) public returns (bool success);
-    function balanceOf(address _owner) public view returns (uint256 balance);
-}
+import {ERC20Interface, SynthetixInterface} from "tradeProxyInterfaces.sol";
 
 contract tradeProxy {
     using SafeMath for uint;
@@ -35,9 +26,9 @@ contract tradeProxy {
     // ========== CONSTANTS ==========
     
     //mainnet
-    address public synthetixContractAddress = 0xC011A72400E58ecD99Ee497CF89E3775d4bd732F;
+    //address public synthetixContractAddress = 0xC011A72400E58ecD99Ee497CF89E3775d4bd732F;
     //kovan
-    //address public synthetixContractAddress = 0x22f1ba6dB6ca0A065e1b7EAe6FC22b7E675310EF;
+    address public synthetixContractAddress = 0x22f1ba6dB6ca0A065e1b7EAe6FC22b7E675310EF;
     
     // ========== STATE VARIABLES ==========
     address public owner;
@@ -71,17 +62,21 @@ contract tradeProxy {
      * @param  _feeRate An optional fee that is given to the trader. Can be zero. The fee is taken from 
      *         the source synth for a trade. The units are basis points * 100. For example, a feeRate
      *         of 0.01% (one bp) would be passed as 100.
+     * @param  _tradingStrategyLabel Label to indicate which strategy is to be implemented for this
+     *         contract.
      */
     constructor(address _owner, 
                 address _trader, 
                 uint _minMinsBtwTrades,
-                uint _feeRate) 
+                uint _feeRate,
+                string memory _tradingStrategyLabel) 
         public
     {
         owner = _owner;
         trader = _trader;
         minMinsBtwTrades = _minMinsBtwTrades;
         feeRate = _feeRate;
+        tradingStrategyLabel = _tradingStrategyLabel;
     }
     
     // ========== SETTER FUNCTIONS ==========
@@ -135,7 +130,7 @@ contract tradeProxy {
         external
         returns (bool)
     {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "Only the owner can call the withdraw function.");
         
         uint withdrawable = getBalance(synthAddress, currencyKey);
         
@@ -161,7 +156,7 @@ contract tradeProxy {
         public
         returns (bool)
     {
-        require(msg.sender == trader);
+        require(msg.sender == trader, "Only the trader can call the withdrawTrader function.");
         
         uint _amount;
         if (amount > feePoolBalances[currencyKey])
@@ -320,7 +315,6 @@ contract tradeProxy {
                    uint _sourceAmount,
                    bytes32 _destinationCurrencyKey);
                    
-    event labelUpdate(string newLabel); 
-      
-
+    event labelUpdate(string _tradingStrategyLabel);
+                   
 }
